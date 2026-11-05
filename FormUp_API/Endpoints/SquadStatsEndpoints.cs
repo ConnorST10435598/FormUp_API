@@ -35,9 +35,14 @@ namespace FormUp_API.Endpoints
                     {
                         playerId = p.Id,
                         name = p.Name,
-                        position = p.Position,
-                        status = entry?.Status ?? "Available", // sets the players status for the match and defaults to available if nothing is recieved
-                        selection = entry?.Selection ?? "NotSelected" //sets whether player is selected and defaulst to not selected
+                        position = p.Position, // Registered player position
+                        status = entry?.Status ?? "Available",
+                        selection = entry?.Selection ?? "NotSelected",
+
+                        // Match-specific tactical arrangement
+                        assignedPosition = entry?.AssignedPosition ?? string.Empty,
+                        pitchX = entry?.PitchX,
+                        pitchY = entry?.PitchY
                     };
                 }).ToList();
 
@@ -63,7 +68,10 @@ namespace FormUp_API.Endpoints
                     squadDictionary[iten.PlayerId] = new SquadEntry
                     {
                         Status = iten.Status,
-                        Selection = iten.Selection
+                        Selection = iten.Selection,
+                        AssignedPosition = iten.AssignedPosition,
+                        PitchX = iten.PitchX,
+                        PitchY = iten.PitchY
                     };
                 }
                 await documentReference.UpdateAsync(new Dictionary<string, object>
@@ -107,6 +115,45 @@ namespace FormUp_API.Endpoints
 
 
             });
+
+            group.MapPut("/{id}/formation", async (
+                string id,
+                SaveMatchFormationRequest request,
+                FirestoreService fireService,
+                ClaimsPrincipal user) =>
+            {
+                string uid = user.GetCoachUid();
+
+                var documentReference = fireService.MatchDoc(uid, id);
+                var snapshot = await documentReference.GetSnapshotAsync();
+
+                if (!snapshot.Exists)
+                {
+                    return Results.Problem(statusCode: 404, title: "Match not found");
+                }
+
+                if (string.IsNullOrWhiteSpace(request.FormationName) ||
+                    string.IsNullOrWhiteSpace(request.FormationCode))
+                {
+                    return Results.BadRequest(new
+                    {
+                        message = "Formation name and formation code are required."
+                    });
+                }
+
+                await documentReference.UpdateAsync(new Dictionary<string, object>
+                {
+                    ["formationName"] = request.FormationName.Trim(),
+                    ["formationCode"] = request.FormationCode.Trim()
+                });
+
+                return Results.Ok(new
+                {
+                    formationName = request.FormationName.Trim(),
+                    formationCode = request.FormationCode.Trim()
+                });
+            });
+
             return app;
 
         }

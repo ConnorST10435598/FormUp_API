@@ -70,5 +70,6 @@ app.MapSessionEndpoints();
 app.MapTeamStatsEndpoints();
 app.MapAttendanceEndpoints();
 app.MapSeasonDataEndpoints();
+app.MapFormationEndpoints();
 
 app.Run();

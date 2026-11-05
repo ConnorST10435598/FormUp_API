@@ -5,15 +5,15 @@ namespace FormUp_API.Services
     public class FirestoreService
     {
         public FirestoreDb FireDatabase { get; }
-        
+
         public FirestoreService(IConfiguration config)
         {
-            string projectId = config["Firebase:ProjectId"]?? throw new InvalidOperationException("missing configuration");
+            string projectId = config["Firebase:ProjectId"] ?? throw new InvalidOperationException("missing configuration");
             string? credentialsJson = config["Firebase:CredentialsJson"];
 
-            if (!string.IsNullOrWhiteSpace(credentialsJson)) 
+            if (!string.IsNullOrWhiteSpace(credentialsJson))
             {
-                FireDatabase = new FirestoreDbBuilder 
+                FireDatabase = new FirestoreDbBuilder
                 { ProjectId = projectId, JsonCredentials = credentialsJson }.Build();
             }
             else
@@ -23,7 +23,7 @@ namespace FormUp_API.Services
 
         }
 
-        public DocumentReference CoachDoc(string uid) 
+        public DocumentReference CoachDoc(string uid)
         {
             CollectionReference coachesCollection = FireDatabase.Collection("coaches");
             DocumentReference coachDocument = coachesCollection.Document(uid);
@@ -72,5 +72,14 @@ namespace FormUp_API.Services
             return sessionDocument;
         }
 
+        public CollectionReference FormationsCollection(string uid)
+        {
+            return CoachDoc(uid).Collection("formations");
+        }
+
+        public DocumentReference FormationDoc(string uid, string formationId)
+        {
+            return FormationsCollection(uid).Document(formationId);
+        }
     }
 }
