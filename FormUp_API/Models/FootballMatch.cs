@@ -35,6 +35,13 @@ namespace FormUp_API.Models
         [FirestoreProperty("attendance")]
         public Dictionary<string, AttendanceEntry> Attendance { get; set; } = new();
 
+        [FirestoreProperty("formationName")]
+        public string FormationName { get; set; } = string.Empty;
+
+        [FirestoreProperty("formationCode")]
+        public string FormationCode { get; set; } = string.Empty;
+
+
 
         public FootballMatch()
         {

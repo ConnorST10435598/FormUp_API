@@ -1,4 +1,5 @@
-﻿using Google.Cloud.Firestore;
+﻿
+using Google.Cloud.Firestore;
 
 namespace FormUp_API.Models
 {
@@ -10,9 +11,21 @@ namespace FormUp_API.Models
 
         [FirestoreProperty("selection")]
         public string Selection { get; set; } = string.Empty;
+
+        // The player's tactical position for this particular match.
+        // This does not change the player's registered position.
+        [FirestoreProperty("assignedPosition")]
+        public string AssignedPosition { get; set; } = string.Empty;
+
+        // Normalised pitch coordinates.
+        [FirestoreProperty("pitchX")]
+        public double? PitchX { get; set; }
+
+        [FirestoreProperty("pitchY")]
+        public double? PitchY { get; set; }
+
         public SquadEntry()
         {
-            
         }
     }
 }
