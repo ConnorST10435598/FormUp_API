@@ -1,0 +1,18 @@
+name: FormUp 12-hour reminders
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+jobs:
+  send-reminders:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ask API to send reminders
+        env:
+          REMINDER_URL: ${{ secrets.REMINDER_URL }}
+          REMINDER_SECRET: ${{ secrets.REMINDER_SECRET }}
+        run: |
+          curl --fail-with-body --show-error --silent --retry 2 \
+            --max-time 120 -X POST \
+            -H "X-Reminder-Secret: $REMINDER_SECRET" \
+            "$REMINDER_URL"
