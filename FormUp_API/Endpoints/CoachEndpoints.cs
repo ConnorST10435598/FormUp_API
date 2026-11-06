@@ -54,7 +54,29 @@ namespace FormUp_API.Endpoints
                 var updatedCoach = updatedSnapshot.ConvertTo<Coach>();
                 return Results.Ok(updatedCoach);
             });
+            // Registers the signed-in coach's FCM token (called after login and on token refresh).
+            group.MapPost("/device-token", async (DeviceTokenRequest request, ReminderService reminders, ClaimsPrincipal user) =>
+            {
+                if (string.IsNullOrWhiteSpace(request.Token) || request.Token.Length > 4096)
+                    return Results.BadRequest();
+                await reminders.RegisterTokenAsync(user.GetCoachUid(), request.Token);
+                return Results.NoContent();
+            });
+
+            // Saves the coach's preference for match and training reminders.
+            group.MapPut("/reminders", async (ReminderPreference request, ReminderService reminders, ClaimsPrincipal user) =>
+            {
+                await reminders.SetEnabledAsync(user.GetCoachUid(), request.Enabled);
+                return Results.NoContent();
+            });
+
             return app;
         }
     }
+}
+
+namespace FormUp_API.Endpoints
+{
+    public record DeviceTokenRequest(string Token);
+    public record ReminderPreference(bool Enabled);
 }

@@ -44,15 +44,16 @@ builder.Services.AddAuthorizationBuilder()
 
 builder.Services.AddSingleton<FirestoreService>();
 builder.Services.AddSingleton<CoachService>();
+builder.Services.AddSingleton<ReminderService>();
 builder.Services.AddProblemDetails();
 
 var app = builder.Build();
 app.UseExceptionHandler();
-
-
+if (app.Environment.IsDevelopment())
+{
     app.UseSwagger();
     app.UseSwaggerUI();
-
+}
 
 app.UseHttpsRedirection();
 app.UseAuthentication();
@@ -63,6 +64,7 @@ app.MapGet("/health", () => Results.Ok(new { Status = "Healthy" }))
    .AllowAnonymous();
 
 app.MapCoachEndpoints();
+app.MapReminderEndpoints();
 app.MapPlayerEndpoints();
 app.MapTeamEndpoints();
 app.MapMatchEndpoints();
